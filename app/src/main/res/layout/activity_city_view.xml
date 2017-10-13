@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.quai13.weather.CityView">
+
+
+    <LinearLayout
+        android:layout_width="@dimen/_100sdp"
+        android:layout_height="495dp"
+        android:orientation="vertical"
+        tools:layout_editor_absoluteX="20dp"
+        tools:layout_editor_absoluteY="9dp"
+        android:id="@+id/linearLayout">
+
+
+        <TextView
+            android:id="@+id/labelCity"
+            android:layout_width="@dimen/_100ssp"
+            android:layout_height="wrap_content"
+            android:text="City" />
+
+        <TextView
+            android:id="@+id/labelCountry"
+            android:layout_width="@dimen/_100ssp"
+            android:layout_height="wrap_content"
+            android:text="Country" />
+
+        <TextView
+            android:id="@+id/labelWind"
+            android:layout_width="@dimen/_100ssp"
+            android:layout_height="wrap_content"
+            android:text="Wind" />
+
+        <TextView
+            android:id="@+id/labelTemp"
+            android:layout_width="@dimen/_100ssp"
+            android:layout_height="wrap_content"
+            android:text="Temp" />
+
+        <TextView
+            android:id="@+id/labelPressure"
+            android:layout_width="@dimen/_100ssp"
+            android:layout_height="wrap_content"
+            android:text="Pressure" />
+
+        <TextView
+            android:id="@+id/labelDate"
+            android:layout_width="@dimen/_100ssp"
+            android:layout_height="wrap_content"
+            android:text="Date" />
+
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="@dimen/_250sdp"
+        android:layout_height="498dp"
+        android:orientation="vertical"
+        tools:layout_editor_absoluteY="11dp"
+        app:layout_constraintLeft_toRightOf="@+id/linearLayout"
+        android:layout_marginLeft="8dp">
+
+
+        <TextView
+            android:id="@+id/valueCity"
+            android:layout_width="@dimen/_100ssp"
+            android:layout_height="wrap_content"
+            android:text="_" />
+
+        <TextView
+            android:id="@+id/valueCountry"
+            android:layout_width="@dimen/_100ssp"
+            android:layout_height="wrap_content"
+            android:text="_" />
+
+        <TextView
+            android:id="@+id/valueWind"
+            android:layout_width="@dimen/_100ssp"
+            android:layout_height="wrap_content"
+            android:text="_" />
+
+        <TextView
+            android:id="@+id/valueTemp"
+            android:layout_width="@dimen/_100ssp"
+            android:layout_height="wrap_content"
+            android:text="_" />
+
+        <TextView
+            android:id="@+id/valuePressure"
+            android:layout_width="@dimen/_100ssp"
+            android:layout_height="wrap_content"
+            android:text="_" />
+
+        <TextView
+            android:id="@+id/valueDate"
+            android:layout_width="@dimen/_100ssp"
+            android:layout_height="wrap_content"
+            android:text="_" />
+
+    </LinearLayout>
+
+</android.support.constraint.ConstraintLayout>
