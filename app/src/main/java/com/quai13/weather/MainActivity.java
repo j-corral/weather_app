@@ -6,6 +6,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -19,6 +22,8 @@ public class MainActivity extends AppCompatActivity {
     ListView simpleList;
 
     ArrayList<City> cities;
+
+    static final int ADD_NEW_CITY = 1;
 
 
     @Override
@@ -118,6 +123,52 @@ public class MainActivity extends AppCompatActivity {
 
         City Seoul = new City("Seoul", "Korea", 34, "NO", 19, 889);
         cities.add(Seoul);
+    }
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_actionbar, menu);
+        return true;
+    }
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                // app icon in action bar clicked; goto parent activity.
+                this.finish();
+                return true;
+            case R.id.addCity:
+
+                Intent intent = new Intent(this, AddCityActivity.class);
+                startActivityForResult(intent, ADD_NEW_CITY);
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == ADD_NEW_CITY) {
+            if (resultCode == RESULT_OK) {
+
+                String city = data.getStringExtra("city");
+                String country = data.getStringExtra("country");
+
+                City newCity = new City(city, country);
+
+
+                cities.add(newCity);
+
+            }
+        }
     }
 
 

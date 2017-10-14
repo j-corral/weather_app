@@ -2,6 +2,9 @@ package com.quai13.weather;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.TextView;
 
 public class CityView extends AppCompatActivity {
@@ -34,8 +37,8 @@ public class CityView extends AppCompatActivity {
         valueDate.setText(city.getHDate());
 
 
-
-
-
     }
+
+
+
 }

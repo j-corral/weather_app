@@ -18,6 +18,11 @@ public class City implements Serializable {
     private Integer pressure;
     private Integer temp;
 
+    public City(String name, String country) {
+        this.name = Tools.ucFirst(name);
+        this.country = Tools.ucFirst(country);
+        setUpdate();
+    }
 
     public City(String name, String country, int wind_speed, String wind_orientation, int temp, int pressure) {
         this.name = name;
@@ -26,6 +31,11 @@ public class City implements Serializable {
         this.wind_orientation = wind_orientation;
         this.temp = temp;
         this.pressure = pressure;
+        setUpdate();
+    }
+
+
+    private void setUpdate() {
         this.update = new Date();
     }
 
