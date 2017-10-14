@@ -49,7 +49,7 @@ public class City implements Serializable {
     }
 
     public String getHWind() {
-        return wind_speed  + " km/h (" + wind_orientation  + ")";
+        return wind_speed  + " km/h " + wind_orientation  + "";
     }
 
     public String getHTemp() {
@@ -66,6 +66,28 @@ public class City implements Serializable {
         SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd-MM-yyyy");
 
         return DATE_FORMAT.format(update);
+    }
+
+
+    public void setWind(String wind) {
+        String[] Wind = wind.split("\\s");
+
+        if(Wind.length > 1) {
+            this.wind_speed = Integer.valueOf(Wind[0]);
+            this.wind_orientation = Wind[1];
+        }
+
+    }
+
+
+    public void setTemperature(String temp) {
+        this.temp = Integer.valueOf(temp);
+    }
+
+
+    public void setPressure(String pressure) {
+        Double Pressure = Double.parseDouble(pressure);
+        this.pressure = Pressure.intValue();
     }
 
     @Override

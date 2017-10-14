@@ -1,11 +1,13 @@
 package com.quai13.weather;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.AsyncTask;
+import android.os.StrictMode;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -13,8 +15,16 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -33,6 +43,13 @@ public class MainActivity extends AppCompatActivity {
 
             super.onCreate(savedInstanceState);
             setContentView(R.layout.activity_main);
+
+
+            // Allow Network Connection
+            if (android.os.Build.VERSION.SDK_INT > 9) {
+                StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitNetwork().build();
+                StrictMode.setThreadPolicy(policy);
+            }
 
 
             cities = new ArrayList<City>();
@@ -106,6 +123,9 @@ public class MainActivity extends AppCompatActivity {
             simpleList.setAdapter(arrayAdapter);
 
 
+            updateWeather();
+
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -145,7 +165,10 @@ public class MainActivity extends AppCompatActivity {
 
                 Intent intent = new Intent(this, AddCityActivity.class);
                 startActivityForResult(intent, ADD_NEW_CITY);
-
+                return true;
+            case R.id.refreshWeather:
+                new RefreshWeatherTask().doInBackground();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -164,11 +187,71 @@ public class MainActivity extends AppCompatActivity {
 
                 City newCity = new City(city, country);
 
-
                 cities.add(newCity);
+
+                updateWeather();
 
             }
         }
+    }
+
+
+
+    public class RefreshWeatherTask extends AsyncTask<Void, Void, City> {
+
+        @Override
+        protected City doInBackground(Void... params) {
+
+            updateWeather();
+
+            return null;
+        }
+    }
+
+
+    private void updateWeather() {
+
+        for (int i=0; i < cities.toArray().length; ++i) {
+
+            String adr = YQLBuilder.build(cities.get(i).getName(), cities.get(i).getCountry());
+
+            URL url = null;
+            InputStream in = null;
+
+            try {
+                url = new URL(adr);
+
+                URLConnection urlConnection = url.openConnection();
+                in = new BufferedInputStream(urlConnection.getInputStream());
+
+                JSONResponseHandler JRH = new JSONResponseHandler();
+                List<String> data = JRH.handleResponse(in, "UTF-8");
+
+
+                if(data.toArray().length >= 3) {
+
+                    cities.get(i).setWind(data.get(0));
+                    cities.get(i).setTemperature(data.get(1));
+                    cities.get(i).setPressure(data.get(2));
+
+                }
+
+                in.close();
+
+                Toast toast = Toast.makeText(getApplicationContext(), "Weather updated.", Toast.LENGTH_LONG);
+                toast.show();
+
+
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+
+
+        }
+
     }
 
 
