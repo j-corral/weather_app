@@ -1,6 +1,7 @@
 package com.quai13.weather;
 
 import java.io.Serializable;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -17,6 +18,7 @@ public class City implements Serializable {
     private String wind_orientation;
     private Integer pressure;
     private Integer temp;
+    private String format = "dd/M/yyyy H:m";
 
     public City(String name, String country) {
         this.name = Tools.ucFirst(name);
@@ -63,7 +65,7 @@ public class City implements Serializable {
 
 
     public String getHDate() {
-        SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd-MM-yyyy");
+        SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(format);
 
         return DATE_FORMAT.format(update);
     }
@@ -88,6 +90,18 @@ public class City implements Serializable {
     public void setPressure(String pressure) {
         Double Pressure = Double.parseDouble(pressure);
         this.pressure = Pressure.intValue();
+    }
+
+
+    public void setDate(String date) {
+
+        SimpleDateFormat formatter = new SimpleDateFormat(format);
+
+        try {
+            this.update = formatter.parse(date);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

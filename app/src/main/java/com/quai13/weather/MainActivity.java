@@ -229,11 +229,10 @@ public class MainActivity extends AppCompatActivity {
 
 
                 if(data.toArray().length >= 3) {
-
                     cities.get(i).setWind(data.get(0));
                     cities.get(i).setTemperature(data.get(1));
                     cities.get(i).setPressure(data.get(2));
-
+                    cities.get(i).setDate(data.get(3));
                 }
 
                 in.close();
