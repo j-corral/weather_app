@@ -4,10 +4,9 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.StrictMode;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -28,7 +27,6 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    // Array of strings...
     ListView simpleList;
 
     ArrayList<City> cities;
@@ -45,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
             setContentView(R.layout.activity_main);
 
 
-            // Allow Network Connection
+            // Allow Network Connection : Debug only !
             if (android.os.Build.VERSION.SDK_INT > 9) {
                 StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitNetwork().build();
                 StrictMode.setThreadPolicy(policy);
@@ -135,13 +133,13 @@ public class MainActivity extends AppCompatActivity {
 
     private void populateCities() {
 
-        City Marseille = new City("Marseille", "France", 10, "SE", 28, 1024);
+        City Marseille = new City("Marseille", "France");
         cities.add(Marseille);
 
-        City Avignon = new City("Avignon", "France", 23, "NE", 22, 1105);
+        City Avignon = new City("Avignon", "France");
         cities.add(Avignon);
 
-        City Seoul = new City("Seoul", "Korea", 34, "NO", 19, 889);
+        City Seoul = new City("Seoul", "Korea");
         cities.add(Seoul);
     }
 
@@ -158,7 +156,6 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                // app icon in action bar clicked; goto parent activity.
                 this.finish();
                 return true;
             case R.id.addCity:
@@ -237,7 +234,7 @@ public class MainActivity extends AppCompatActivity {
 
                 in.close();
 
-                Toast toast = Toast.makeText(getApplicationContext(), "Weather updated.", Toast.LENGTH_LONG);
+                Toast toast = Toast.makeText(getApplicationContext(), "Weather updated.", Toast.LENGTH_SHORT);
                 toast.show();
 
 
