@@ -123,7 +123,7 @@ public class JSONResponseHandler {
     }
 
     private String mph2kmh(String n) {
-        return String.valueOf((int) (Integer.parseInt(n)/1.609344));
+        return String.valueOf((int) (Integer.parseInt(n)*1.609344));
     }
     private String deg2compass(String deg) {
         String[] arrComp = {"N","NNE","NE","ENE","E","ESE", "SE", "SSE","S","SSW","SW","WSW","W","WNW","NW","NNW"};
