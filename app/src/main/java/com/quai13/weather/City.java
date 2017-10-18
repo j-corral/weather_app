@@ -11,13 +11,14 @@ import java.util.Date;
 
 public class City implements Serializable {
 
+    private int id;
     private String name;
     private String country;
-    private Date update = new Date();
     private Integer wind_speed = 0;
     private String wind_orientation = "";
-    private Integer pressure = 0;
     private Integer temp = 0;
+    private Integer pressure = 0;
+    private Date date = new Date();
     private String format = "dd/M/yyyy H:mm";
 
     public City(String name, String country) {
@@ -31,6 +32,30 @@ public class City implements Serializable {
 
     public String getCountry() {
         return country;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public Integer getWindSpeed() {
+        return wind_speed;
+    }
+
+    public String getWindOrientation() {
+        return wind_orientation;
+    }
+
+    public Integer getTemperature() {
+        return temp;
+    }
+
+    public Integer getPressure() {
+        return pressure;
+    }
+
+    public Date getDate() {
+        return date;
     }
 
     public String getHWind() {
@@ -48,7 +73,7 @@ public class City implements Serializable {
     public String getHDate() {
         SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(format);
 
-        return DATE_FORMAT.format(update);
+        return DATE_FORMAT.format(this.date);
     }
 
 
@@ -62,6 +87,20 @@ public class City implements Serializable {
 
     }
 
+
+    public void setWindSpeed(int wind_speed) {
+        this.wind_speed = wind_speed;
+    }
+
+    public void setWindOrientation(String wind_orientation) {
+        this.wind_orientation = wind_orientation;
+    }
+
+
+    public void setTemperature(int temp) {
+        this.temp = temp;
+    }
+
     public void setTemperature(String temp) {
         this.temp = Integer.valueOf(temp);
     }
@@ -71,15 +110,19 @@ public class City implements Serializable {
         this.pressure = Pressure.intValue();
     }
 
+    public void setPressure(int pressure) {
+        this.pressure = pressure;
+    }
+
     public void setDate(String date) {
 
         SimpleDateFormat formatter = new SimpleDateFormat(format);
 
-        try {
-            this.update = formatter.parse(date);
+        /*try {
+            this.date = formatter.parse(date);
         } catch (ParseException e) {
             e.printStackTrace();
-        }
+        }*/
     }
 
     @Override

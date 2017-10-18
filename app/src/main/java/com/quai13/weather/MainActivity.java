@@ -7,6 +7,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -27,11 +28,15 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
+    private DBHelper db = new DBHelper(this);
+
     ListView simpleList;
 
-    ArrayList<City> cities;
+    List<City> cities;
 
     static final int ADD_NEW_CITY = 1;
+
+    ArrayAdapter<City> arrayAdapter;
 
 
     @Override
@@ -50,14 +55,17 @@ public class MainActivity extends AppCompatActivity {
             }
 
 
-            cities = new ArrayList<City>();
+            cities = db.getAllCities();
 
 
-            populateCities();
+            if(cities.size() == 0){
+                cities = new ArrayList<City>();
+                populateCities();
+            }
 
 
             simpleList = (ListView)findViewById(R.id.simpleListView);
-            final ArrayAdapter<City> arrayAdapter = new ArrayAdapter<City>(this, R.layout.activity_listview, R.id.textView, cities);
+            arrayAdapter = new ArrayAdapter<City>(this, R.layout.activity_listview, R.id.textView, cities);
 
 
             simpleList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
@@ -79,9 +87,20 @@ public class MainActivity extends AppCompatActivity {
 
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            cities.remove(position);
-                            arrayAdapter.notifyDataSetChanged();
-                            dialog.dismiss();
+
+                            long delete = db.deleteCity(cities.get(position).getName());
+
+                            if(delete > 0) {
+                                cities.remove(position);
+                                arrayAdapter.notifyDataSetChanged();
+                                dialog.dismiss();
+                            } else {
+                                Toast toast = Toast.makeText(getApplicationContext(), cities.get(position).getName() + " could not be deleted !", Toast.LENGTH_SHORT);
+                                toast.show();
+                            }
+
+
+
                         }
                     });
                     alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -121,7 +140,7 @@ public class MainActivity extends AppCompatActivity {
             simpleList.setAdapter(arrayAdapter);
 
 
-            updateWeather();
+            //updateWeather();
 
 
         } catch (Exception e) {
@@ -133,14 +152,24 @@ public class MainActivity extends AppCompatActivity {
 
     private void populateCities() {
 
+        Toast toast = Toast.makeText(getApplicationContext(), "[First load] Populating cities....", Toast.LENGTH_SHORT);
+        toast.show();
+
         City Marseille = new City("Marseille", "France");
-        cities.add(Marseille);
+        if(db.insertCity(Marseille) > 0) {
+            cities.add(Marseille);
+        }
 
         City Avignon = new City("Avignon", "France");
-        cities.add(Avignon);
+        if(db.insertCity(Avignon) > 0) {
+            cities.add(Avignon);
+        }
 
         City Seoul = new City("Seoul", "Korea");
-        cities.add(Seoul);
+        if(db.insertCity(Seoul) > 0) {
+            cities.add(Seoul);
+        }
+
     }
 
 
@@ -184,9 +213,19 @@ public class MainActivity extends AppCompatActivity {
 
                 City newCity = new City(city, country);
 
-                cities.add(newCity);
 
-                updateWeather();
+                long insert = db.insertCity(newCity);
+
+
+                if(insert <= 0) {
+                    Toast toast = Toast.makeText(getApplicationContext(), city + " could not be inserted !", Toast.LENGTH_SHORT);
+                    toast.show();
+                } else {
+                    cities.add(newCity);
+                    updateWeather();
+                }
+
+
 
             }
         }
@@ -233,6 +272,9 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 in.close();
+
+
+                long update = db.updateCity(cities.get(i));
 
                 Toast toast = Toast.makeText(getApplicationContext(), "Weather updated.", Toast.LENGTH_SHORT);
                 toast.show();
