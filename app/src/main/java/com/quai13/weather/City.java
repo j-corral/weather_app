@@ -1,9 +1,12 @@
 package com.quai13.weather;
 
+import android.util.Log;
+
 import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 /**
  * Created by jonathan on 09/10/17.
@@ -18,8 +21,8 @@ public class City implements Serializable {
     private String wind_orientation = "";
     private Integer temp = 0;
     private Integer pressure = 0;
-    private Date date = new Date();
-    private String format = "dd/M/yyyy H:mm";
+    private String date = "";
+    private String format = "dd/M/yyyy H:m";
 
     public City(String name, String country) {
         this.name = Tools.ucFirst(name);
@@ -54,7 +57,7 @@ public class City implements Serializable {
         return pressure;
     }
 
-    public Date getDate() {
+    public String getDate() {
         return date;
     }
 
@@ -71,9 +74,11 @@ public class City implements Serializable {
     }
 
     public String getHDate() {
-        SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(format);
 
-        return DATE_FORMAT.format(this.date);
+        //SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(format);
+        //return DATE_FORMAT.format(this.date);
+
+        return date;
     }
 
 
@@ -116,9 +121,16 @@ public class City implements Serializable {
 
     public void setDate(String date) {
 
-        SimpleDateFormat formatter = new SimpleDateFormat(format);
+        this.date = date;
 
-        /*try {
+        /*SimpleDateFormat formatter = new SimpleDateFormat(format, Locale.FRANCE);
+
+        try {
+
+            date = date.replace("\u00a0","").trim();
+
+            Log.d("date", date);
+
             this.date = formatter.parse(date);
         } catch (ParseException e) {
             e.printStackTrace();

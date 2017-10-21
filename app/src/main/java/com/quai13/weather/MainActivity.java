@@ -32,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
 
     ListView simpleList;
 
-    List<City> cities;
+    ArrayList<City> cities;
 
     static final int ADD_NEW_CITY = 1;
 
@@ -59,7 +59,6 @@ public class MainActivity extends AppCompatActivity {
 
 
             if(cities.size() == 0){
-                cities = new ArrayList<City>();
                 populateCities();
             }
 

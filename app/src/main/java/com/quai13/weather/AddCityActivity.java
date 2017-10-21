@@ -44,9 +44,9 @@ public class AddCityActivity extends AppCompatActivity {
 
                 } else {
 
-                    Toast alert = Toast.makeText(getApplicationContext(), "City " + city +" added successfully", Toast.LENGTH_LONG);
+                    /*Toast alert = Toast.makeText(getApplicationContext(), "City " + city +" added successfully", Toast.LENGTH_LONG);
                     alert.setGravity(Gravity.CENTER, 0,0);
-                    alert.show();
+                    alert.show();*/
 
                     intent.putExtra("city", city);
                     intent.putExtra("country", country);
