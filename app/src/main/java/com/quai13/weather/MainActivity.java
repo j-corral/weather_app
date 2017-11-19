@@ -1,42 +1,35 @@
 package com.quai13.weather;
 
 import android.app.AlertDialog;
+import android.app.LoaderManager;
+import android.content.CursorLoader;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.Loader;
+import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
+import android.widget.CursorAdapter;
 import android.widget.ListView;
+import android.widget.SimpleCursorAdapter;
 import android.widget.Toast;
 
-import java.io.BufferedInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.ArrayList;
-import java.util.List;
-
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private DBHelper db = new DBHelper(this);
 
     ListView simpleList;
 
-    ArrayList<City> cities;
-
     static final int ADD_NEW_CITY = 1;
 
-    ArrayAdapter<City> arrayAdapter;
+    SimpleCursorAdapter adapter;
 
 
     @Override
@@ -55,22 +48,20 @@ public class MainActivity extends AppCompatActivity {
             }
 
 
-            cities = db.getAllCities();
-
-
-            if(cities.size() == 0){
-                populateCities();
-            }
-
 
             simpleList = (ListView)findViewById(R.id.simpleListView);
-            arrayAdapter = new ArrayAdapter<City>(this, R.layout.activity_listview, R.id.textView, cities);
+
+            String[] from = { DBHelper.DBHelperContract.CityEntry.COLUMN_NAME, DBHelper.DBHelperContract.CityEntry.COLUMN_COUNTRY };
+            int[] to = { R.id.name_entry, R.id.country_entry };
+            adapter = new SimpleCursorAdapter(this, R.layout.activity_listview, null, from, to, CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
+
+            getLoaderManager().initLoader(0, null, this);
 
 
             simpleList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
 
                 @Override
-                public boolean onItemLongClick(AdapterView<?> parent, View view,
+                public boolean onItemLongClick(AdapterView<?> parent, final View view,
                                                final int position, long arg3) {
 
 
@@ -78,23 +69,29 @@ public class MainActivity extends AppCompatActivity {
                             MainActivity.this);
                     alert.setTitle("Delete");
 
-                    City city = arrayAdapter.getItem(position);
-
-
-                    alert.setMessage(city.getName() + " will be removed.");
+                    alert.setMessage("city will be removed.");
                     alert.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
 
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
 
-                            long delete = db.deleteCity(cities.get(position).getName());
+                            Cursor cursor = ((SimpleCursorAdapter) simpleList.getAdapter()).getCursor();
+                            cursor.moveToPosition(position);
+
+                            String name = cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.DBHelperContract.CityEntry.COLUMN_NAME));
+                            String country = cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.DBHelperContract.CityEntry.COLUMN_COUNTRY));
+
+                            int delete = getContentResolver().delete(
+                                    WeatherContentProvider.buildURI(name, country),
+                                    null,
+                                    null
+                            );
 
                             if(delete > 0) {
-                                cities.remove(position);
-                                arrayAdapter.notifyDataSetChanged();
+                                getLoaderManager().restartLoader(0, null, MainActivity.this);
                                 dialog.dismiss();
                             } else {
-                                Toast toast = Toast.makeText(getApplicationContext(), cities.get(position).getName() + " could not be deleted !", Toast.LENGTH_SHORT);
+                                Toast toast = Toast.makeText(getApplicationContext(), name + " could not be deleted !", Toast.LENGTH_SHORT);
                                 toast.show();
                             }
 
@@ -125,7 +122,28 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-                    City city = arrayAdapter.getItem(position);
+                    Cursor cursor = ((SimpleCursorAdapter) simpleList.getAdapter()).getCursor();
+                    cursor.moveToPosition(position);
+
+                    String name = cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.DBHelperContract.CityEntry.COLUMN_NAME));
+                    String country = cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.DBHelperContract.CityEntry.COLUMN_COUNTRY));
+                    City city = new City(name, country);
+
+                    Integer pressure = cursor.getInt(cursor.getColumnIndexOrThrow(DBHelper.DBHelperContract.CityEntry.COLUMN_PRESSURE));
+                    city.setPressure(pressure);
+
+                    Integer temperature = cursor.getInt(cursor.getColumnIndexOrThrow(DBHelper.DBHelperContract.CityEntry.COLUMN_TEMPERATURE));
+                    city.setTemperature(temperature);
+
+                    Integer speed = cursor.getInt(cursor.getColumnIndexOrThrow(DBHelper.DBHelperContract.CityEntry.COLUMN_WIND_SPEED));
+                    city.setWindSpeed(speed);
+
+                    String orientation = cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.DBHelperContract.CityEntry.COLUMN_WIND_ORIENTATION));
+                    city.setWindOrientation(orientation);
+
+
+                    String date = cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.DBHelperContract.CityEntry.COLUMN_DATE));
+                    city.setWindOrientation(date);
 
                     Intent intent = new Intent(MainActivity.this, CityView.class);
                     intent.putExtra("city", city);
@@ -133,13 +151,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
-
-
-
-            simpleList.setAdapter(arrayAdapter);
-
-
-            //updateWeather();
+            simpleList.setAdapter(adapter);
 
 
         } catch (Exception e) {
@@ -156,17 +168,17 @@ public class MainActivity extends AppCompatActivity {
 
         City Marseille = new City("Marseille", "France");
         if(db.insertCity(Marseille) > 0) {
-            cities.add(Marseille);
+            //cities.add(Marseille);
         }
 
         City Avignon = new City("Avignon", "France");
         if(db.insertCity(Avignon) > 0) {
-            cities.add(Avignon);
+            //cities.add(Avignon);
         }
 
         City Seoul = new City("Seoul", "Korea");
         if(db.insertCity(Seoul) > 0) {
-            cities.add(Seoul);
+            //cities.add(Seoul);
         }
 
     }
@@ -212,24 +224,41 @@ public class MainActivity extends AppCompatActivity {
 
                 City newCity = new City(city, country);
 
-
                 long insert = db.insertCity(newCity);
-
 
                 if(insert <= 0) {
                     Toast toast = Toast.makeText(getApplicationContext(), city + " could not be inserted !", Toast.LENGTH_SHORT);
                     toast.show();
-                } else {
-                    cities.add(newCity);
-                    updateWeather();
                 }
-
-
 
             }
         }
     }
 
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+
+        CursorLoader loader = new CursorLoader(
+                this,
+                WeatherContentProvider.CONTENT_URI,
+                null,
+                null,
+                null,
+                DBHelper.DBHelperContract.CityEntry.COLUMN_NAME + " ASC"
+        );
+
+        return loader;
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        adapter.swapCursor(data);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        adapter.swapCursor(null);
+    }
 
 
     public class RefreshWeatherTask extends AsyncTask<Void, Void, City> {
@@ -237,14 +266,14 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected City doInBackground(Void... params) {
 
-            updateWeather();
+            //updateWeather();
 
             return null;
         }
     }
 
 
-    private void updateWeather() {
+    /*private void updateWeather() {
 
         for (int i=0; i < cities.toArray().length; ++i) {
 
@@ -289,7 +318,7 @@ public class MainActivity extends AppCompatActivity {
 
         }
 
-    }
+    }*/
 
 
 }

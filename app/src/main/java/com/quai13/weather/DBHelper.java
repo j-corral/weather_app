@@ -21,7 +21,8 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String DATABASE_NAME = "weather.db";
 
     private static final String SQL_CREATE_ENTRIES = "CREATE TABLE IF NOT EXISTS " + DBHelperContract.CityEntry.TABLE_NAME +
-            " (" + DBHelperContract.CityEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+            " (" +
+            DBHelperContract.CityEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
             DBHelperContract.CityEntry.COLUMN_NAME + " TEXT, " +
             DBHelperContract.CityEntry.COLUMN_COUNTRY + " TEXT, " +
             DBHelperContract.CityEntry.COLUMN_WIND_SPEED + " INTEGER, " +
@@ -46,70 +47,44 @@ public class DBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        // This database is only a cache for online data, so its upgrade policy is
-        // to simply to discard the data and start over
         db.execSQL(SQL_DELETE_ENTRIES);
         onCreate(db);
     }
 
 
-    public ArrayList<City> getAllCities() {
-
-        ArrayList cities = new ArrayList<City>();
+    public Cursor getAllCities(String sortOrder) {
 
         SQLiteDatabase db = this.getReadableDatabase();
 
-        String[] projection = {
-                DBHelperContract.CityEntry._ID,
-                DBHelperContract.CityEntry.COLUMN_NAME,
-                DBHelperContract.CityEntry.COLUMN_COUNTRY,
-                DBHelperContract.CityEntry.COLUMN_TEMPERATURE,
-                DBHelperContract.CityEntry.COLUMN_WIND_SPEED,
-                DBHelperContract.CityEntry.COLUMN_WIND_ORIENTATION,
-                DBHelperContract.CityEntry.COLUMN_PRESSURE,
-                DBHelperContract.CityEntry.COLUMN_DATE,
-        };
-
         Cursor cursor = db.query(
-                DBHelperContract.CityEntry.TABLE_NAME,                     // The table to query
-                projection,                               // The columns to return
-                null,                                // The columns for the WHERE clause
-                null,                            // The values for the WHERE clause
-                null,                                     // don't group the rows
-                null,                                     // don't filter by row groups
-                DBHelperContract.CityEntry._ID                                 // The sort order
+                DBHelperContract.CityEntry.TABLE_NAME,
+                null,
+                null,
+                null,
+                null,
+                null,
+                sortOrder
         );
 
-
-        if (cursor.moveToFirst()) {
-
-            do {
+        return cursor;
+    }
 
 
-                String name = cursor.getString(cursor.getColumnIndexOrThrow(DBHelperContract.CityEntry.COLUMN_NAME));
-                String country = cursor.getString(cursor.getColumnIndexOrThrow(DBHelperContract.CityEntry.COLUMN_COUNTRY));
-                int wind_speed = cursor.getInt(cursor.getColumnIndexOrThrow(DBHelperContract.CityEntry.COLUMN_WIND_SPEED));
-                String wind_orientation = cursor.getString(cursor.getColumnIndexOrThrow(DBHelperContract.CityEntry.COLUMN_WIND_ORIENTATION));
-                int temperature = cursor.getInt(cursor.getColumnIndexOrThrow(DBHelperContract.CityEntry.COLUMN_TEMPERATURE));
-                int pressure = cursor.getInt(cursor.getColumnIndexOrThrow(DBHelperContract.CityEntry.COLUMN_PRESSURE));
-                String date = cursor.getString(cursor.getColumnIndexOrThrow(DBHelperContract.CityEntry.COLUMN_DATE));
+    public Cursor getCity(String city, String country) {
 
+        SQLiteDatabase db = this.getReadableDatabase();
 
-                City city = new City(name, country);
-                city.setWindSpeed(wind_speed);
-                city.setWindOrientation(wind_orientation);
-                city.setPressure(pressure);
-                city.setTemperature(temperature);
-                city.setDate(date);
+        Cursor cursor = db.query(
+                DBHelperContract.CityEntry.TABLE_NAME,
+                null,
+                DBHelperContract.CityEntry.COLUMN_NAME + "=? AND " + DBHelperContract.CityEntry.COLUMN_COUNTRY + "=?",
+                new String[]{city, country},
+                null, null,
+                null,
+                null
+        );
 
-                cities.add(city);
-
-            } while (cursor.moveToNext());
-
-        }
-
-
-        return cities;
+        return cursor;
     }
 
 
@@ -118,8 +93,13 @@ public class DBHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
-        values.put("name", city.getName());
-        values.put("country", city.getCountry());
+        values.put(DBHelperContract.CityEntry.COLUMN_NAME, city.getName());
+        values.put(DBHelperContract.CityEntry.COLUMN_COUNTRY, city.getCountry());
+        values.put(DBHelperContract.CityEntry.COLUMN_TEMPERATURE, 0);
+        values.put(DBHelperContract.CityEntry.COLUMN_WIND_ORIENTATION, "NO");
+        values.put(DBHelperContract.CityEntry.COLUMN_WIND_SPEED, 0);
+        values.put(DBHelperContract.CityEntry.COLUMN_PRESSURE, 0);
+        values.put(DBHelperContract.CityEntry.COLUMN_DATE, "");
 
         long insert =  db.insert(DBHelperContract.CityEntry.TABLE_NAME, null, values);
 

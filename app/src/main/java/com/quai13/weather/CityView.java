@@ -1,13 +1,24 @@
 package com.quai13.weather;
 
+import android.app.LoaderManager;
+import android.content.CursorLoader;
+import android.content.Loader;
+import android.database.Cursor;
+import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.CursorAdapter;
 import android.widget.TextView;
 
-public class CityView extends AppCompatActivity {
+import java.net.URI;
+
+public class CityView extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
+
+    City city = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -15,7 +26,7 @@ public class CityView extends AppCompatActivity {
         setContentView(R.layout.activity_city_view);
 
 
-        City city = (City) getIntent().getExtras().getSerializable("city");
+        city = (City) getIntent().getExtras().getSerializable("city");
 
         TextView valueCity = (TextView) findViewById(R.id.valueCity);
         valueCity.setText(city.getName());
@@ -37,8 +48,60 @@ public class CityView extends AppCompatActivity {
         valueDate.setText(city.getHDate());
 
 
+        getLoaderManager().initLoader(0, null, this);
+
     }
 
 
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 
+        CursorLoader loader = new CursorLoader(
+                this,
+                WeatherContentProvider.buildURI(city.getName(), city.getCountry()),
+                null,
+                null,
+                null,
+                DBHelper.DBHelperContract.CityEntry.COLUMN_NAME + " ASC"
+        );
+
+        return loader;
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+
+        try {
+            data.moveToFirst();
+            String name = data.getString(data.getColumnIndexOrThrow(DBHelper.DBHelperContract.CityEntry.COLUMN_NAME));
+            String country = data.getString(data.getColumnIndexOrThrow(DBHelper.DBHelperContract.CityEntry.COLUMN_COUNTRY));
+
+            Integer pressure = data.getInt(data.getColumnIndexOrThrow(DBHelper.DBHelperContract.CityEntry.COLUMN_PRESSURE));
+            city.setPressure(pressure);
+
+            Integer temperature = data.getInt(data.getColumnIndexOrThrow(DBHelper.DBHelperContract.CityEntry.COLUMN_TEMPERATURE));
+            city.setTemperature(temperature);
+
+            Integer speed = data.getInt(data.getColumnIndexOrThrow(DBHelper.DBHelperContract.CityEntry.COLUMN_WIND_SPEED));
+            city.setWindSpeed(speed);
+
+            String orientation = data.getString(data.getColumnIndexOrThrow(DBHelper.DBHelperContract.CityEntry.COLUMN_WIND_ORIENTATION));
+            city.setWindOrientation(orientation);
+
+
+            String date = data.getString(data.getColumnIndexOrThrow(DBHelper.DBHelperContract.CityEntry.COLUMN_DATE));
+            city.setWindOrientation(date);
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+
+    }
 }

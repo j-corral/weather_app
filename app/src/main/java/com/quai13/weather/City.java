@@ -14,7 +14,7 @@ import java.util.Locale;
 
 public class City implements Serializable {
 
-    private int id;
+    //private int id;
     private String name;
     private String country;
     private Integer wind_speed = 0;
@@ -37,9 +37,9 @@ public class City implements Serializable {
         return country;
     }
 
-    public int getId() {
+    /*public int getId() {
         return id;
-    }
+    }*/
 
     public Integer getWindSpeed() {
         return wind_speed;
