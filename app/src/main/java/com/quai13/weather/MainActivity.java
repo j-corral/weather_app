@@ -231,6 +231,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                     toast.show();
                 }
 
+                getLoaderManager().restartLoader(0, null, this);
+
             }
         }
     }
