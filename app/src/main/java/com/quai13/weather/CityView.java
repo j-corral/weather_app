@@ -56,9 +56,13 @@ public class CityView extends AppCompatActivity implements LoaderManager.LoaderC
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 
+        Uri uri = WeatherContentProvider.buildURI(city.getName(), city.getCountry());
+
+        Log.d("loader URI: ", uri.toString());
+
         CursorLoader loader = new CursorLoader(
                 this,
-                WeatherContentProvider.buildURI(city.getName(), city.getCountry()),
+                uri,
                 null,
                 null,
                 null,
@@ -72,25 +76,34 @@ public class CityView extends AppCompatActivity implements LoaderManager.LoaderC
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
 
         try {
-            data.moveToFirst();
-            String name = data.getString(data.getColumnIndexOrThrow(DBHelper.DBHelperContract.CityEntry.COLUMN_NAME));
-            String country = data.getString(data.getColumnIndexOrThrow(DBHelper.DBHelperContract.CityEntry.COLUMN_COUNTRY));
 
-            Integer pressure = data.getInt(data.getColumnIndexOrThrow(DBHelper.DBHelperContract.CityEntry.COLUMN_PRESSURE));
-            city.setPressure(pressure);
+            if(data != null && data.moveToFirst()) {
 
-            Integer temperature = data.getInt(data.getColumnIndexOrThrow(DBHelper.DBHelperContract.CityEntry.COLUMN_TEMPERATURE));
-            city.setTemperature(temperature);
+                String name = data.getString(data.getColumnIndexOrThrow(DBHelper.DBHelperContract.CityEntry.COLUMN_NAME));
+                String country = data.getString(data.getColumnIndexOrThrow(DBHelper.DBHelperContract.CityEntry.COLUMN_COUNTRY));
 
-            Integer speed = data.getInt(data.getColumnIndexOrThrow(DBHelper.DBHelperContract.CityEntry.COLUMN_WIND_SPEED));
-            city.setWindSpeed(speed);
+                Integer pressure = data.getInt(data.getColumnIndexOrThrow(DBHelper.DBHelperContract.CityEntry.COLUMN_PRESSURE));
+                city.setPressure(pressure);
 
-            String orientation = data.getString(data.getColumnIndexOrThrow(DBHelper.DBHelperContract.CityEntry.COLUMN_WIND_ORIENTATION));
-            city.setWindOrientation(orientation);
+                Integer temperature = data.getInt(data.getColumnIndexOrThrow(DBHelper.DBHelperContract.CityEntry.COLUMN_TEMPERATURE));
+                city.setTemperature(temperature);
+
+                Integer speed = data.getInt(data.getColumnIndexOrThrow(DBHelper.DBHelperContract.CityEntry.COLUMN_WIND_SPEED));
+                city.setWindSpeed(speed);
+
+                String orientation = data.getString(data.getColumnIndexOrThrow(DBHelper.DBHelperContract.CityEntry.COLUMN_WIND_ORIENTATION));
+                city.setWindOrientation(orientation);
 
 
-            String date = data.getString(data.getColumnIndexOrThrow(DBHelper.DBHelperContract.CityEntry.COLUMN_DATE));
-            city.setWindOrientation(date);
+                String date = data.getString(data.getColumnIndexOrThrow(DBHelper.DBHelperContract.CityEntry.COLUMN_DATE));
+                city.setDate(date);
+
+
+                data.close();
+
+            } else {
+                Log.d("loader", "data is null");
+            }
 
 
         } catch (Exception e) {

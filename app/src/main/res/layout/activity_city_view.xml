@@ -66,37 +66,37 @@
 
         <TextView
             android:id="@+id/valueCity"
-            android:layout_width="@dimen/_100ssp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="_" />
 
         <TextView
             android:id="@+id/valueCountry"
-            android:layout_width="@dimen/_100ssp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="_" />
 
         <TextView
             android:id="@+id/valueWind"
-            android:layout_width="@dimen/_100ssp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="_" />
 
         <TextView
             android:id="@+id/valueTemp"
-            android:layout_width="@dimen/_100ssp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="_" />
 
         <TextView
             android:id="@+id/valuePressure"
-            android:layout_width="@dimen/_100ssp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="_" />
 
         <TextView
             android:id="@+id/valueDate"
-            android:layout_width="@dimen/_100ssp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="_" />
 
