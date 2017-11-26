@@ -6,13 +6,13 @@ Jonathan Corral
 ## About
 Weather app allows you to get weather from Yahoo Api.
 
-[Home](home.png)
+![Home](home.png)
 
-[Add city](add.png)
+![Add city](add.png)
 
-[View city](city.png)
+![View city](city.png)
 
-[Delete city](delete.png)
+![Delete city](delete.png)
 
 ## Features
 - Add city
