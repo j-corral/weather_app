@@ -105,7 +105,6 @@ public class WeatherContentProvider extends ContentProvider {
                 break;
             case WEATHER_CITY:
                 result = ContentResolver.CURSOR_ITEM_BASE_TYPE + vnd;
-//                result = ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + AUTHORITY + ".weather_provider";
                 Log.d("provider type:", "city");
             break;
             default:
