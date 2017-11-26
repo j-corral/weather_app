@@ -1,13 +1,17 @@
 package com.quai13.weather;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.app.AlertDialog;
 import android.app.LoaderManager;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.CursorLoader;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
-import android.os.AsyncTask;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.support.v7.app.AppCompatActivity;
@@ -31,6 +35,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     SimpleCursorAdapter adapter;
 
+    Account account = new Account("default", YQLBuilder.host);
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,15 +46,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             super.onCreate(savedInstanceState);
             setContentView(R.layout.activity_main);
 
-
-            // Allow Network Connection : Debug only !
-            if (android.os.Build.VERSION.SDK_INT > 9) {
-                StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitNetwork().build();
-                StrictMode.setThreadPolicy(policy);
-            }
-
-
-
             simpleList = (ListView)findViewById(R.id.simpleListView);
 
             String[] from = { DBHelper.DBHelperContract.CityEntry.COLUMN_NAME, DBHelper.DBHelperContract.CityEntry.COLUMN_COUNTRY };
@@ -56,7 +53,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             adapter = new SimpleCursorAdapter(this, R.layout.activity_listview, null, from, to, CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
 
             getLoaderManager().initLoader(0, null, this);
-
 
             simpleList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
 
@@ -81,11 +77,9 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                             String name = cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.DBHelperContract.CityEntry.COLUMN_NAME));
                             String country = cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.DBHelperContract.CityEntry.COLUMN_COUNTRY));
 
-                            int delete = getContentResolver().delete(
-                                    WeatherContentProvider.buildURI(name, country),
-                                    null,
-                                    null
-                            );
+                            Uri uri = WeatherContentProvider.buildURI(name, country);
+
+                            int delete = getContentResolver().delete(uri, null, null);
 
                             if(delete > 0) {
                                 getLoaderManager().restartLoader(0, null, MainActivity.this);
@@ -143,7 +137,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
 
                     String date = cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.DBHelperContract.CityEntry.COLUMN_DATE));
-                    city.setWindOrientation(date);
+                    city.setDate(date);
 
                     Intent intent = new Intent(MainActivity.this, CityView.class);
                     intent.putExtra("city", city);
@@ -153,36 +147,31 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
             simpleList.setAdapter(adapter);
 
+            ContentResolver.removePeriodicSync(
+                    account,
+                    WeatherContentProvider.AUTHORITY,
+                    Bundle.EMPTY
+            );
+
+            ContentResolver.setSyncAutomatically(
+                    account,
+                    WeatherContentProvider.AUTHORITY,
+                    true
+            );
+
+            ContentResolver.addPeriodicSync(
+                    account,
+                    WeatherContentProvider.AUTHORITY,
+                    Bundle.EMPTY,
+                    60L * 60L
+            );
+
 
         } catch (Exception e) {
             e.printStackTrace();
         }
 
     }
-
-
-    private void populateCities() {
-
-        Toast toast = Toast.makeText(getApplicationContext(), "[First load] Populating cities....", Toast.LENGTH_SHORT);
-        toast.show();
-
-        City Marseille = new City("Marseille", "France");
-        if(db.insertCity(Marseille) > 0) {
-            //cities.add(Marseille);
-        }
-
-        City Avignon = new City("Avignon", "France");
-        if(db.insertCity(Avignon) > 0) {
-            //cities.add(Avignon);
-        }
-
-        City Seoul = new City("Seoul", "Korea");
-        if(db.insertCity(Seoul) > 0) {
-            //cities.add(Seoul);
-        }
-
-    }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -204,7 +193,13 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                 startActivityForResult(intent, ADD_NEW_CITY);
                 return true;
             case R.id.refreshWeather:
-                new RefreshWeatherTask().doInBackground();
+
+                try{
+                    updateWeather();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -219,22 +214,49 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         if (requestCode == ADD_NEW_CITY) {
             if (resultCode == RESULT_OK) {
 
-                String city = data.getStringExtra("city");
+                String name = data.getStringExtra("city");
                 String country = data.getStringExtra("country");
 
-                City newCity = new City(city, country);
+                Uri uri = WeatherContentProvider.buildURI(name, country);
 
-                long insert = db.insertCity(newCity);
+                ContentValues values = new ContentValues();
+                values.put(DBHelper.DBHelperContract.CityEntry.COLUMN_NAME, name);
+                values.put(DBHelper.DBHelperContract.CityEntry.COLUMN_COUNTRY, country);
 
-                if(insert <= 0) {
-                    Toast toast = Toast.makeText(getApplicationContext(), city + " could not be inserted !", Toast.LENGTH_SHORT);
+                Uri insert = getContentResolver().insert(uri, values);
+
+                if(insert == null) {
+                    Toast toast = Toast.makeText(getApplicationContext(), name + " could not be inserted !", Toast.LENGTH_SHORT);
                     toast.show();
                 }
 
                 getLoaderManager().restartLoader(0, null, this);
 
+
+                try{
+                    updateWeather();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
             }
         }
+    }
+
+
+    private void updateWeather() throws Exception {
+        Bundle settingsBundle = new Bundle();
+        settingsBundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
+        settingsBundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
+
+        ContentResolver.requestSync(
+                account,
+                WeatherContentProvider.AUTHORITY,
+                settingsBundle
+        );
+
+        Toast toast = Toast.makeText(this, "Updating weather...", Toast.LENGTH_SHORT);
+        toast.show();
     }
 
     @Override
@@ -261,66 +283,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     public void onLoaderReset(Loader<Cursor> loader) {
         adapter.swapCursor(null);
     }
-
-
-    public class RefreshWeatherTask extends AsyncTask<Void, Void, City> {
-
-        @Override
-        protected City doInBackground(Void... params) {
-
-            //updateWeather();
-
-            return null;
-        }
-    }
-
-
-    /*private void updateWeather() {
-
-        for (int i=0; i < cities.toArray().length; ++i) {
-
-            String adr = YQLBuilder.build(cities.get(i).getName(), cities.get(i).getCountry());
-
-            URL url = null;
-            InputStream in = null;
-
-            try {
-                url = new URL(adr);
-
-                URLConnection urlConnection = url.openConnection();
-                in = new BufferedInputStream(urlConnection.getInputStream());
-
-                JSONResponseHandler JRH = new JSONResponseHandler();
-                List<String> data = JRH.handleResponse(in, "UTF-8");
-
-
-                if(data.toArray().length >= 3) {
-                    cities.get(i).setWind(data.get(0));
-                    cities.get(i).setTemperature(data.get(1));
-                    cities.get(i).setPressure(data.get(2));
-                    cities.get(i).setDate(data.get(3));
-                }
-
-                in.close();
-
-
-                long update = db.updateCity(cities.get(i));
-
-                Toast toast = Toast.makeText(getApplicationContext(), "Weather updated.", Toast.LENGTH_SHORT);
-                toast.show();
-
-
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-
-
-        }
-
-    }*/
 
 
 }

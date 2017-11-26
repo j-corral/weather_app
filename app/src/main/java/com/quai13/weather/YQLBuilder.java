@@ -13,7 +13,7 @@ import android.util.Log;
 public class YQLBuilder {
 
     private static String scheme = "https";
-    private static String host = "query.yahooapis.com";
+    public static final String host = "query.yahooapis.com";
     private static String path = "v1/public/yql";
     private static String queryParam = "q";
     private static String format = "json";
