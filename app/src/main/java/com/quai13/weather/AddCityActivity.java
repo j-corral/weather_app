@@ -48,8 +48,8 @@ public class AddCityActivity extends AppCompatActivity {
                     alert.setGravity(Gravity.CENTER, 0,0);
                     alert.show();*/
 
-                    intent.putExtra("city", city);
-                    intent.putExtra("country", country);
+                    intent.putExtra("city", Tools.ucFirst(city));
+                    intent.putExtra("country", Tools.ucFirst(country));
                     setResult(RESULT_OK, intent);
                     finish();
                 }
