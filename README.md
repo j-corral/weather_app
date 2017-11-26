@@ -2,7 +2,9 @@
 
 ## Authors
 Jonathan Corral
+
 Student in master degree of computer science at CERI Avignon
+
 
 ## Contributors
 Stephane Huet : [JSonResponseHandler](https://github.com/johnlejardinnier/weather_app/blob/master/app/src/main/java/com/quai13/weather/JSONResponseHandler.java)
@@ -34,6 +36,27 @@ Weather is a native Android application which allows you to get weather from Yah
 
 ![Delete city](delete.png)
 
+
+
+## Project state
+- TP1 finished:
+
+    - use ListView
+    - use ArrayList
+    - use Activities
+    - use Button Listener
+    - use Async Task
+
+
+- TP2 : 90%
+
+    - use DB with SQLite (ok)
+    - use Content Provider (ok)
+    - use Loader with SimpleCursorAdapter (ok)
+    - use Sync Adapter (90%, cf. Bugs section)
+
+
+
 ## Features
 - Add city
 - Remove city
@@ -44,3 +67,5 @@ Weather is a native Android application which allows you to get weather from Yah
 ## Bugs
 - Crash if city or country does not exist
 - Layouts are not perfect
+- Date is not parsed properly
+- Automatic sync does not seems to work
