@@ -74,32 +74,35 @@ public class DBHelper extends SQLiteOpenHelper {
 
         SQLiteDatabase db = this.getReadableDatabase();
 
+        String[] projection = new String[]{
+                DBHelperContract.CityEntry._ID,
+                DBHelperContract.CityEntry.COLUMN_NAME,
+                DBHelperContract.CityEntry.COLUMN_COUNTRY,
+                DBHelperContract.CityEntry.COLUMN_TEMPERATURE,
+                DBHelperContract.CityEntry.COLUMN_WIND_SPEED,
+                DBHelperContract.CityEntry.COLUMN_WIND_ORIENTATION,
+                DBHelperContract.CityEntry.COLUMN_DATE,
+                DBHelperContract.CityEntry.COLUMN_PRESSURE
+        };
+
         Cursor cursor = db.query(
                 DBHelperContract.CityEntry.TABLE_NAME,
-                null,
+                projection,
                 DBHelperContract.CityEntry.COLUMN_NAME + "=? AND " + DBHelperContract.CityEntry.COLUMN_COUNTRY + "=?",
                 new String[]{city, country},
-                null, null,
                 null,
-                null
+                null,
+                null,
+                "1"
         );
 
         return cursor;
     }
 
 
-    public long insertCity(City city) {
+    public long insertCity(ContentValues values) {
 
         SQLiteDatabase db = this.getWritableDatabase();
-
-        ContentValues values = new ContentValues();
-        values.put(DBHelperContract.CityEntry.COLUMN_NAME, city.getName());
-        values.put(DBHelperContract.CityEntry.COLUMN_COUNTRY, city.getCountry());
-        values.put(DBHelperContract.CityEntry.COLUMN_TEMPERATURE, 0);
-        values.put(DBHelperContract.CityEntry.COLUMN_WIND_ORIENTATION, "NO");
-        values.put(DBHelperContract.CityEntry.COLUMN_WIND_SPEED, 0);
-        values.put(DBHelperContract.CityEntry.COLUMN_PRESSURE, 0);
-        values.put(DBHelperContract.CityEntry.COLUMN_DATE, "");
 
         long insert =  db.insert(DBHelperContract.CityEntry.TABLE_NAME, null, values);
 
@@ -112,13 +115,14 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
 
-    public long deleteCity(String name) {
+    public long deleteCity(String name, String country) {
 
         SQLiteDatabase db = this.getWritableDatabase();
 
         long delete = db.delete(DBHelperContract.CityEntry.TABLE_NAME,
-                DBHelperContract.CityEntry.COLUMN_NAME +" = ?",
-                new String[] { name });
+                DBHelperContract.CityEntry.COLUMN_NAME + "=? AND " + DBHelperContract.CityEntry.COLUMN_COUNTRY + "=?",
+                new String[] { name, country }
+        );
 
         db.close();
 
@@ -128,26 +132,23 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
 
-    public long updateCity(City city) {
+    public long updateCity(ContentValues values) {
 
         SQLiteDatabase db = this.getWritableDatabase();
 
-        ContentValues values = new ContentValues();
-        values.put("pressure", city.getPressure());
-        values.put("temperature", city.getTemperature());
-        values.put("wind_speed", city.getWindSpeed());
-        values.put("wind_orientation", city.getWindOrientation());
-        values.put("date", city.getDate());
+        String name = values.getAsString(DBHelperContract.CityEntry.COLUMN_NAME);
+        String country = values.getAsString(DBHelperContract.CityEntry.COLUMN_COUNTRY);
 
         long update = db.update(
                 DBHelperContract.CityEntry.TABLE_NAME,
                 values,
-                DBHelperContract.CityEntry.COLUMN_NAME +" = ?",
-                new String[] { city.getName() }
+                DBHelperContract.CityEntry.COLUMN_NAME + "=? AND " + DBHelperContract.CityEntry.COLUMN_COUNTRY + "=?",
+                new String[] { name, country }
         );
 
         db.close();
 
+        Log.d("update at:", name + "," + country);
         Log.d("weather", "Update: " + String.valueOf(update));
 
         return update;
